@@ -70,7 +70,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-      drivetrain.inputHandler(leftStick.getY() /2, leftStick.getX() /2, rightStick.getX() / 1.5);    
+
+      drivetrain.inputHandler((Math.abs(leftStick.getY()) < 0.01f ? 0.0f : leftStick.getY() ) /2, (Math.abs(leftStick.getX()) < 0.01f ? 0.0f : leftStick.getX() ) /2, (Math.abs(rightStick.getX()) < 0.05f ? 0.0f : rightStick.getX() ) / 1.5);   
+      SmartDashboard.putNumber("Joystick X:", leftStick.getX()); 
   }
 
   @Override

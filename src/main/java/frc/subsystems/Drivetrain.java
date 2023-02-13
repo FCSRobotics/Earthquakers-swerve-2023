@@ -78,6 +78,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     CANCoder backRight;
     public QuakerModule[] swerveMods;
     public CANCoder[] encoders;
+    public double[] offset;
 
     public DoubleSupplier odometryX; 
     public DoubleSupplier odometryY; 
@@ -92,11 +93,11 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID);
         driveSpeeds = new ChassisSpeeds(0.0,0.0,0.0);
         driveController = new HolonomicDriveController(
-            new PIDController(0.0, 0, 0), // TBD
-            new PIDController(0.0, 0, 0),  // TBD
-            new ProfiledPIDController(0.000, 0,0, new Constraints(0, 0) //TBD
+            new PIDController(1, 0, 0), // TBD
+            new PIDController(1, 0, 0),  // TBD
+            new ProfiledPIDController(1, 0,0, new Constraints(0, 0) //TBD
         ));
-        steerController = new PIDController(0.00, 0, 0);
+        steerController = new PIDController(1, 0, 0);
         driveState = States.STOPPED;
         frontLeftModule = new QuakerModule(
             GearRatio.FAST, 
@@ -168,6 +169,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         backRight = new CANCoder(BACK_RIGHT_MODULE_STEER_ENCODER);
         swerveMods = new QuakerModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
         encoders = new CANCoder[]{frontLeft, frontRight, backLeft, backRight};
+        offset = new double[]{FRONT_LEFT_MODULE_STEER_OFFSET,FRONT_RIGHT_MODULE_STEER_OFFSET,BACK_LEFT_MODULE_STEER_OFFSET,BACK_RIGHT_MODULE_STEER_OFFSET};
         
     }
     public void update(){
@@ -255,7 +257,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY);
         for(QuakerModule module : swerveMods){
             // if(module.getID() == 0) System.out.println(states[module.getID()].angle.getDegrees());
-            SmartDashboard.putNumber(module.getID() + " angle: ", encoders[module.getID()].getPosition());
+            SmartDashboard.putNumber(module.getID() + " angle: ", ((encoders[module.getID()].getPosition()+(Math.toDegrees(offset[module.getID()])))%360+360)%360);
             module.set(
                 (states[module.getID()].speedMetersPerSecond / MAX_VELOCITY)* MAX_VOLTAGE,  // Speed of current state, converted to voltage
                 states[module.getID()].angle.getRadians() // Angle of coresponding state 
